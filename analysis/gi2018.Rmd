@@ -138,16 +138,47 @@ plot_data <- gi2018 %>%
               retweet = sum(is_retweet)) %>%
     mutate(total = orig + retweet)
 
-ggplot(plot_data, aes(total, orig - retweet)) +
+ggplot(plot_data, aes(total, (orig / total) - (retweet / total))) +
         geom_hline(yintercept = 0, colour = "red") +
         geom_point(colour = "skyblue3") +
         geom_text_repel(data = top_n(plot_data, 10, total), 
                         aes(label = screen_name)) +
-        labs(x = "Total tweets", y = "original tweets - retweets",
+        labs(x = "Total tweets",
+             y = "<<< more retweets : more original tweets >>>",
              title = "#gi2018 original tweets compared to retweets",
              subtitle = "top 10 users labelled") + 
         theme(axis.text = element_text(size = 12),
               axis.title = element_text(size = 12))
+```
+
+## Top tweeters by time
+
+```{r tweets-top-users-time}
+top_users <- gi2018 %>%
+    count(screen_name) %>% 
+    arrange(desc(n)) %>%
+    slice(1:5) %>%
+    pull(screen_name) %>%
+    forcats::fct_inorder()
+
+gi2018 %>%
+    filter(screen_name %in% top_users) %>%
+    mutate(screen_name = factor(screen_name,
+                                levels = levels(top_users))) %>%
+    mutate(datetime = as_datetime(created_at, tz = "Europe/London")) %>%
+    ggplot(aes(datetime, 1, shape = is_retweet, colour = screen_name)) +
+        geom_jitter(width = 0, height = 1) +
+        scale_color_brewer(palette = "Set1", guide = FALSE) +
+        facet_wrap(~ screen_name, ncol = 1) +
+        labs(x = "Datetime",
+             title = "#gi2018 top users timeline",
+             subtitle = "when the top 5 users tweeted") + 
+        theme(axis.text = element_text(size = 12),
+              axis.title = element_text(size = 12),
+              axis.title.y = element_blank(),
+              axis.text.y = element_blank(),
+              axis.ticks.y = element_blank(),
+              legend.position = "bottom")
 ```
 
 ## Top tweeters by day
