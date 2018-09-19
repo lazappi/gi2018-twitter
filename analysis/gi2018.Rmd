@@ -31,6 +31,7 @@ library(rtweet)
 library(dplyr)
 library(tidyr)
 library(ggplot2)
+library(ggrepel)
 library(lubridate)
 library(knitr)
 library(wordcloud)
@@ -128,6 +129,27 @@ gi2018 %>%
               axis.title = element_text(size = 12))
 ```
 
+## Retweet proportion
+
+```{r tweets-retweet-prop}
+plot_data <- gi2018 %>%
+    group_by(screen_name) %>%
+    summarise(orig = sum(!is_retweet),
+              retweet = sum(is_retweet)) %>%
+    mutate(total = orig + retweet)
+
+ggplot(plot_data, aes(total, orig - retweet)) +
+        geom_hline(yintercept = 0, colour = "red") +
+        geom_point(colour = "skyblue3") +
+        geom_text_repel(data = top_n(plot_data, 10, total), 
+                        aes(label = screen_name)) +
+        labs(x = "Total tweets", y = "original tweets - retweets",
+             title = "#gi2018 original tweets compared to retweets",
+             subtitle = "top 10 users labelled") + 
+        theme(axis.text = element_text(size = 12),
+              axis.title = element_text(size = 12))
+```
+
 ## Top tweeters by day
 
 ### Day 1
@@ -203,6 +225,45 @@ gi2018_days %>%
         coord_flip() +
         labs(x = "Screen Name", y = "Tweets",
              title = "#gi2018 tweets by user, Day 2",
+             subtitle = "top 20 users, no retweets") + 
+        theme(axis.text = element_text(size = 12),
+              axis.title = element_text(size = 12))
+```
+
+### Day 3
+
+```{r tweets-top-users-day3}
+gi2018_days %>% 
+    filter(date == as_date("2018-09-19")) %>%
+    ungroup() %>%
+    count(screen_name) %>% 
+    arrange(desc(n)) %>%
+    slice(1:20) %>% 
+    ggplot(aes(reorder(screen_name, n), n)) +
+        geom_col(fill = "skyblue3") +
+        coord_flip() +
+        labs(x = "Screen Name", y = "Tweets",
+             title = "#gi2018 tweets by user, Day 3",
+             subtitle = "top 20 users") + 
+        theme(axis.text = element_text(size = 12),
+              axis.title = element_text(size = 12))
+```
+
+### Day 3 (no retweets)
+
+```{r tweets-top-users-day3-orig}
+gi2018_days %>% 
+    filter(date == as_date("2018-09-19")) %>%
+    ungroup() %>%
+    filter(is_retweet == FALSE) %>%
+    count(screen_name) %>% 
+    arrange(desc(n)) %>%
+    slice(1:20) %>% 
+    ggplot(aes(reorder(screen_name, n), n)) +
+        geom_col(fill = "skyblue3") +
+        coord_flip() +
+        labs(x = "Screen Name", y = "Tweets",
+             title = "#gi2018 tweets by user, Day 3",
              subtitle = "top 20 users, no retweets") + 
         theme(axis.text = element_text(size = 12),
               axis.title = element_text(size = 12))
