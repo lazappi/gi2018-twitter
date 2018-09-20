@@ -50,6 +50,9 @@ if (file.exists("../output/gi2018.Rds")) {
     saveRDS(gi2018, "../output/gi2018.Rds")
 }
 
+meeting_days <- seq(from = as_date("2018-09-17"),
+                     to = as_date("2018-09-20"),
+                     by = "day")
 ```
 
 # Introduction
@@ -185,162 +188,53 @@ gi2018 %>%
 
 ### All tweets {.tabset}
 
-#### Day 1 {.unnumbered}
-
-```{r tweets-top-users-day1}
-gi2018_days %>% 
-    filter(date == as_date("2018-09-17")) %>%
-    ungroup() %>%
-    count(screen_name) %>% 
-    arrange(desc(n)) %>%
-    slice(1:20) %>% 
-    ggplot(aes(reorder(screen_name, n), n)) +
-        geom_col(fill = "skyblue3") +
-        coord_flip() +
-        labs(x = "Screen Name", y = "Tweets",
-             title = "#gi2018 tweets by user, Day 1",
-             subtitle = "top 20 users") + 
-        theme(axis.text = element_text(size = 12),
-              axis.title = element_text(size = 12))
-```
-
-#### Day 2 {.unnumbered}
-
-```{r tweets-top-users-day2}
-gi2018_days %>% 
-    filter(date == as_date("2018-09-18")) %>%
-    ungroup() %>%
-    count(screen_name) %>% 
-    arrange(desc(n)) %>%
-    slice(1:20) %>% 
-    ggplot(aes(reorder(screen_name, n), n)) +
-        geom_col(fill = "skyblue3") +
-        coord_flip() +
-        labs(x = "Screen Name", y = "Tweets",
-             title = "#gi2018 tweets by user, Day 2",
-             subtitle = "top 20 users") + 
-        theme(axis.text = element_text(size = 12),
-              axis.title = element_text(size = 12))
-```
-
-#### Day 3 {.unnumbered}
-
-```{r tweets-top-users-day3}
-gi2018_days %>% 
-    filter(date == as_date("2018-09-19")) %>%
-    ungroup() %>%
-    count(screen_name) %>% 
-    arrange(desc(n)) %>%
-    slice(1:20) %>% 
-    ggplot(aes(reorder(screen_name, n), n)) +
-        geom_col(fill = "skyblue3") +
-        coord_flip() +
-        labs(x = "Screen Name", y = "Tweets",
-             title = "#gi2018 tweets by user, Day 3",
-             subtitle = "top 20 users") + 
-        theme(axis.text = element_text(size = 12),
-              axis.title = element_text(size = 12))
-```
-
-#### Day 4 {.unnumbered}
-
-```{r tweets-top-users-day4}
-gi2018_days %>% 
-    filter(date == as_date("2018-09-20")) %>%
-    ungroup() %>%
-    count(screen_name) %>% 
-    arrange(desc(n)) %>%
-    slice(1:20) %>% 
-    ggplot(aes(reorder(screen_name, n), n)) +
-        geom_col(fill = "skyblue3") +
-        coord_flip() +
-        labs(x = "Screen Name", y = "Tweets",
-             title = "#gi2018 tweets by user, Day 4",
-             subtitle = "top 20 users") + 
-        theme(axis.text = element_text(size = 12),
-              axis.title = element_text(size = 12))
+```{r tweets-top-users-day-loop, results="asis"}
+for (d in 1:length(meeting_days)) {
+    day <- meeting_days[d]
+    cat(paste0('<div id="top-tweeters-by-day-', d, '" class="section level4 tabset"><h4>Day ', d, '</h4>'))
+    g <- gi2018_days %>% 
+        filter(date == day) %>%
+        ungroup() %>%
+        count(screen_name) %>% 
+        arrange(desc(n)) %>%
+        slice(1:20) %>% 
+        ggplot(aes(reorder(screen_name, n), n)) +
+            geom_col(fill = "skyblue3") +
+            coord_flip() +
+            labs(x = "Screen Name", y = "Tweets",
+                 title = paste0("#gi2018 tweets by user, Day ", d, " (", as_date(day), ")"),
+                 subtitle = "top 20 users") + 
+            theme(axis.text = element_text(size = 12),
+                  axis.title = element_text(size = 12))
+    print(g)
+    cat('</div>', fill = T)
+}
 ```
 
 ### Original tweets {.tabset}
 
-#### Day 1 {.unnumbered}
-
-```{r tweets-top-users-day1-orig}
-gi2018_days %>% 
-    filter(date == as_date("2018-09-17")) %>%
-    ungroup() %>%
-    filter(is_retweet == FALSE) %>%
-    count(screen_name) %>% 
-    arrange(desc(n)) %>%
-    slice(1:20) %>% 
-    ggplot(aes(reorder(screen_name, n), n)) +
-        geom_col(fill = "skyblue3") +
-        coord_flip() +
-        labs(x = "Screen Name", y = "Tweets",
-             title = "#gi2018 tweets by user, Day 1",
-             subtitle = "top 20 users, no retweets") + 
-        theme(axis.text = element_text(size = 12),
-              axis.title = element_text(size = 12))
-```
-
-#### Day 2 {.unnumbered}
-
-```{r tweets-top-users-day2-orig}
-gi2018_days %>% 
-    filter(date == as_date("2018-09-18")) %>%
-    ungroup() %>%
-    filter(is_retweet == FALSE) %>%
-    count(screen_name) %>% 
-    arrange(desc(n)) %>%
-    slice(1:20) %>% 
-    ggplot(aes(reorder(screen_name, n), n)) +
-        geom_col(fill = "skyblue3") +
-        coord_flip() +
-        labs(x = "Screen Name", y = "Tweets",
-             title = "#gi2018 tweets by user, Day 2",
-             subtitle = "top 20 users, no retweets") + 
-        theme(axis.text = element_text(size = 12),
-              axis.title = element_text(size = 12))
-```
-
-#### Day 3 {.unnumbered}
-
-```{r tweets-top-users-day3-orig}
-gi2018_days %>% 
-    filter(date == as_date("2018-09-19")) %>%
-    ungroup() %>%
-    filter(is_retweet == FALSE) %>%
-    count(screen_name) %>% 
-    arrange(desc(n)) %>%
-    slice(1:20) %>% 
-    ggplot(aes(reorder(screen_name, n), n)) +
-        geom_col(fill = "skyblue3") +
-        coord_flip() +
-        labs(x = "Screen Name", y = "Tweets",
-             title = "#gi2018 tweets by user, Day 3",
-             subtitle = "top 20 users, no retweets") + 
-        theme(axis.text = element_text(size = 12),
-              axis.title = element_text(size = 12))
-```
-
-#### Day 4 {.unnumbered}
-
-```{r tweets-top-users-day4-orig}
-gi2018_days %>% 
-    filter(date == as_date("2018-09-20")) %>%
-    ungroup() %>%
-    filter(is_retweet == FALSE) %>%
-    count(screen_name) %>% 
-    arrange(desc(n)) %>%
-    slice(1:20) %>% 
-    ggplot(aes(reorder(screen_name, n), n)) +
-        geom_col(fill = "skyblue3") +
-        coord_flip() +
-        labs(x = "Screen Name", y = "Tweets",
-             title = "#gi2018 tweets by user, Day 4",
-             subtitle = "top 20 users, no retweets") + 
-        theme(axis.text = element_text(size = 12),
-              axis.title = element_text(size = 12))
+```{r tweets-top-users-orig-day-loop, results="asis"}
+for (d in 1:length(meeting_days)) {
+    day <- meeting_days[d]
+    cat(paste0('<div id="top-original-tweeters-by-day-', d, '" class="section level4 tabset"><h4>Day ', d, '</h4>'))
+    g <- gi2018_days %>%
+        filter(date == day) %>%
+        ungroup() %>%
+        filter(is_retweet == FALSE) %>%
+        count(screen_name) %>% 
+        arrange(desc(n)) %>%
+        slice(1:20) %>% 
+        ggplot(aes(reorder(screen_name, n), n)) +
+            geom_col(fill = "skyblue3") +
+            coord_flip() +
+            labs(x = "Screen Name", y = "Tweets",
+                 title = paste0("#gi2018 tweets by user, Day ", d, " (", as_date(day), ")"),
+                 subtitle = "top 20 users, no retweets") + 
+            theme(axis.text = element_text(size = 12),
+                  axis.title = element_text(size = 12))
+  print(g)
+  cat('</div>', fill = T)
+}
 ```
 
 ## Sources
